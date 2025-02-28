@@ -22,7 +22,7 @@ function ProductCard({ product }) {
 
         {/* CARD ACTIONS */}
         <div className="flex justify-end gap-2 mt-4">
-          <Link to={`/product/${product.id}`} className="btn btn-sm btn-info btn-outline text-[#098FCB]">
+          <Link to={`/AdminDashboard/product/${product.id}`} className="btn btn-sm btn-info btn-outline text-[#098FCB]">
             <EditIcon className="w-4 h-4" />
           </Link>
 

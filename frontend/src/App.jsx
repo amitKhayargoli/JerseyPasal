@@ -1,4 +1,4 @@
-import { BrowserRouter,Routes,Route } from 'react-router-dom'
+import {BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 import Signup from './public/Signup'
 import Login from './public/Login'
@@ -10,12 +10,12 @@ import CustomerDashboard from './private/CustomerDashboard'
 function App() {
 
   return (
-    <BrowserRouter>
+    <Router>
     <Routes>
     <Route index element={<Landingpage/>} />
       <Route path="/Signup" element={<Signup/>}/>
       <Route path="/Login" element={<Login/>}/>
-      <Route path="/AdminDashboard" element={<AdminDashboard/>}/>
+      <Route path="/AdminDashboard/*" element={<AdminDashboard />} />
       <Route path="/CustomerDashboard" element={<CustomerDashboard/>}/>
       {/* <Route
           path="/CustomerDashboard"
@@ -27,7 +27,7 @@ function App() {
         /> */}
       
     </Routes>
-    </BrowserRouter>
+    </Router>
   )
 }
 
