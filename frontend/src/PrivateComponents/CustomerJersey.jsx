@@ -1,8 +1,10 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { CartContext } from "./CartContext";
 
 function CustomerJersey() {
   const [products, setProducts] = useState([]);
+  const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -27,7 +29,9 @@ function CustomerJersey() {
             <img className="customerJerseyImage" src={product.image} alt={product.name} />
             <h3 className="customerJerseyDetails">{product.name}</h3>
             <p className="customerJerseyPrice">${product.price}</p>
-            <button className="customerJerseyButton">Add to Cart</button>
+            <button className="customerJerseyButton" onClick={() => addToCart(product)}>
+              Add to Cart
+            </button>
           </div>
         ))}
       </div>

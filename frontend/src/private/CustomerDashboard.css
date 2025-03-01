@@ -211,3 +211,82 @@
   .customerJerseyButton:hover {
     background: #0fbf0c;
   }
+  /* Container for the cart */
+.customerCartContain {
+  padding: 20px;
+  background-color: #000;
+  min-height: 100vh;
+}
+
+/* Heading for the cart */
+.customerCartHeading {
+  text-align: center;
+  margin: 20px 0;
+  color: white;
+  font-size: 2rem;
+}
+
+/* Table for the cart items */
+.customerCartTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+/* Table header */
+.customerCartTable th {
+  background-color: #13ee0f;
+  color: white;
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+/* Table rows */
+.customerCartTable td {
+  background-color: #1a1a1a;
+  color: white;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+/* Image for the cart item */
+.customerCartImage {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+/* Button to remove the cart item */
+.customerCartButton {
+  background: #ff1414;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+/* Hover effect for the remove button */
+.customerCartButton:hover {
+  background: #bf0c0c;
+}
+
+/* Purchase button */
+.purchaseButton {
+  background: #13ee0f;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+  display: block;
+  margin: 20px auto;
+}
+
+/* Hover effect for the purchase button */
+.purchaseButton:hover {
+  background: #0fbf0c;
+}
