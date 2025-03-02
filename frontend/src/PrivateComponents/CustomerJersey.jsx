@@ -9,7 +9,12 @@ function CustomerJersey() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/products");
+        const token = localStorage.getItem("token");
+        const response = await axios.get("http://localhost:3000/api/products", {
+          headers: {
+            Authorization: `Bearer: ${token}`,
+          },
+        });
         setProducts(response.data.data);
       } catch (error) {
         console.error("Error fetching products", error);
@@ -19,6 +24,8 @@ function CustomerJersey() {
     fetchProducts();
   }, []);
 
+  console.log("Jerseys", products);
+
   return (
     <div className="customerJerseyContain" id="jersey">
       <h1 className="customerJerseyHeading">Jersey Collection</h1>
@@ -26,10 +33,17 @@ function CustomerJersey() {
       <div className="customerJerseyContainer">
         {products.map((product) => (
           <div key={product.id} className="customerJerseyCard">
-            <img className="customerJerseyImage" src={product.image} alt={product.name} />
+            <img
+              className="customerJerseyImage"
+              src={product.image}
+              alt={product.name}
+            />
             <h3 className="customerJerseyDetails">{product.name}</h3>
             <p className="customerJerseyPrice">${product.price}</p>
-            <button className="customerJerseyButton" onClick={() => addToCart(product)}>
+            <button
+              className="customerJerseyButton"
+              onClick={() => addToCart(product)}
+            >
               Add to Cart
             </button>
           </div>

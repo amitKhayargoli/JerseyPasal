@@ -1,162 +1,87 @@
-import User from "../model/user.js";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
+import User from "../model/user.js";
 
-dotenv.config();
-
-// 📌 Generate JWT Token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
-};
-
-// 📌 User login
-export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await User.findOne({ where: { email } });
-
-    if (user && (await bcrypt.compare(password, user.password))) {
-      res.json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        token: generateToken(user.id),
-      });
-    } else {
-      res.status(401).json({ message: "Invalid email or password" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Error logging in", error });
-  }
-};
-
-// 📌 Register user
-export const registerUser = async (req, res) => {
+const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    const userExists = await User.findOne({ where: { email } });
+    console.log("Register request received for:", email);
 
-    if (userExists) {
+    // Check if user already exists
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      console.log("User already exists:", email);
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Hash password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
+    const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
     });
 
-    res.status(201).json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      token: generateToken(user.id),
-    });
+    console.log("User registered successfully:", newUser);
+    res
+      .status(201)
+      .json({ message: "User registered successfully", user: newUser });
   } catch (error) {
-    console.error("Error registering user:", error); // Add detailed logging
-    res.status(500).json({ message: "Error registering user", error });
+    console.error("Error registering user:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
 
-// 📌 Get user profile
-export const getUserProfile = async (req, res) => {
-  try {
-    const user = await User.findByPk(req.user.id);
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
 
-    if (user) {
-      res.json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        isAdmin: user.isAdmin,
-      });
-    } else {
-      res.status(404).json({ message: "User not found" });
+  try {
+    console.log("Login request received for:", email);
+
+    // Find user by email
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      console.log("User not found:", email);
+      return res.status(400).json({ message: "Invalid email or password" });
     }
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching user profile", error });
-  }
-};
 
-// 📌 Update user profile
-export const updateUserProfile = async (req, res) => {
-  try {
-    const user = await User.findByPk(req.user.id);
+    console.log("User found:", user);
 
-    if (user) {
-      user.name = req.body.name || user.name;
-      user.email = req.body.email || user.email;
-      if (req.body.password) {
-        user.password = await bcrypt.hash(req.body.password, 10);
-      }
-
-      await user.save();
-
-      res.json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        token: generateToken(user.id),
-      });
-    } else {
-      res.status(404).json({ message: "User not found" });
+    // Compare entered password with hashed password in database
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      console.log("Invalid password attempt for user:", email);
+      return res.status(400).json({ message: "Invalid email or password" });
     }
-  } catch (error) {
-    res.status(500).json({ message: "Error updating user profile", error });
-  }
-};
 
-// 📌 Get all users (Admin only)
-export const getAllUsers = async (req, res) => {
-  try {
-    const users = await User.findAll();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching users", error });
-  }
-};
+    console.log("Password valid for user:", email);
 
-// 📌 Delete user (Admin only)
-export const deleteUser = async (req, res) => {
-  try {
-    const user = await User.findByPk(req.params.id);
+    // Log the JWT_SECRET to check if it's properly loaded
+    console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
-    if (user) {
-      await user.destroy();
-      res.json({ message: "User deleted" });
-    } else {
-      res.status(404).json({ message: "User not found" });
+    // Assign role based on email domain
+    let role = "customer";
+    if (email.endsWith("@hotmail.com")) {
+      role = "admin";
     }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    console.log("Login successful, token generated for:", email);
+    res.status(200).json({ message: "Login successful", token });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting user", error });
+    console.error("Error logging in:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
-
-
-const updateUserToAdmin = async (userId) => {
-  try {
-    const user = await User.findByPk(userId);
-    if (user) {
-      user.isAdmin = true;
-      await user.save();
-      console.log("User updated to admin");
-    } else {
-      console.log("User not found");
-    }
-  } catch (error) {
-    console.error("Error updating user to admin:", error);
-  }
-};
-
-// Call the function with the user ID you want to update
-updateUserToAdmin(1); // Replace 1 with the actual user ID
+export { registerUser, loginUser };

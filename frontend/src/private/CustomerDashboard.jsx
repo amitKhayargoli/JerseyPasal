@@ -4,7 +4,7 @@ import { CartProvider } from "../PrivateComponents/CartContext";
 import CustomerHome from "../PrivateComponents/CustomerHome"
 import CustomerJersey from "../PrivateComponents/CustomerJersey";
 import CustomerCart from "../PrivateComponents/CustomerCart";
-import Footer from "../LPComponents/Footer";
+import Footer from "../LPcomponents/Footer";
 
 
 function CustomerDashboard() {

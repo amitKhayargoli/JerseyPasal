@@ -45,37 +45,45 @@ const Login = () => {
     return valid;
   };
 
-  const handleSubmit = async (e) => {
+  const onSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      try {
-        const response = await axios.post("http://localhost:3000/api/users/login", {
-          email: formData.email,
-          password: formData.password,
-        });
+    axios
+      .post(`http://localhost:3000/api/auth/login`, JSON.stringify(formData), {
+        headers: { "Content-Type": "application/json" },
+      })
+      .then((response) => {
+        console.log("Login Response:", response.data);
 
-        if (response.status === 200) {
-          alert("Login successful");
-          console.log("Login successful", response.data);
-          // Store user data in localStorage or context
-          localStorage.setItem("token", response.data.token); // Store the token here
-          // Redirect to CustomerDashboard
-          navigate("/CustomerDashboard");
+        if (response.data.data.access_token) {
+          localStorage.setItem("token", response.data.data.access_token);
+          localStorage.setItem("role", response.data.data.role);
+
+          let userRole = response.data.data.role;
+          console.log("User Role:", userRole);
+          if (userRole === "admin") {
+            navigate("/adminDashboard");
+          } else {
+            navigate("/CustomerDashboard");
+          }
+        } else {
+          alert("Login failed! Check credentials.");
         }
-      } catch (error) {
-        console.error("Error during login", error.response ? error.response.data : error.message);
-        alert("Error during login: " + (error.response ? error.response.data.message : error.message));
-      }
-    }
+      })
+      .catch((error) => {
+        console.error(
+          "Error logging in:",
+          error.response?.data || error.message
+        ); // Log the detailed error response
+        alert("Error logging in. Please try again.");
+      });
   };
 
   return (
     <div className="container">
-      <div className="main">
-      </div>
+      <div className="main"></div>
 
       <div className="color">
-        <form id="form" onSubmit={handleSubmit}>
+        <form id="form" onSubmit={onSubmit}>
           <label className="LoginLabel">Welcome back</label>
           <br />
 
@@ -88,7 +96,9 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
             />
-            {errors.email && <span className="email_error">{errors.email}</span>}
+            {errors.email && (
+              <span className="email_error">{errors.email}</span>
+            )}
           </div>
 
           <div className="form-control">
@@ -100,13 +110,19 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
             />
-            {errors.password && <span className="pass_error">{errors.password}</span>}
+            {errors.password && (
+              <span className="pass_error">{errors.password}</span>
+            )}
           </div>
 
-          <button className="Loginbtn" type="submit">Login</button>
+          <button className="Loginbtn" type="submit">
+            Login
+          </button>
           <div className="last">
             <a>Create an account?</a>{" "}
-            <span><Link to="/Signup"> Sign up</Link></span>
+            <span>
+              <Link to="/Signup"> Sign up</Link>
+            </span>
           </div>
         </form>
       </div>
